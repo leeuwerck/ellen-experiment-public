@@ -1,0 +1,190 @@
+:fullscreen,
+::backdrop {
+  background-color: rgba(255, 255, 255, 0);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+p {
+  padding-bottom: 1em;
+  text-align: left;
+}
+
+.wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  background-color: white;
+  text-align: center;
+}
+input {
+  padding: 1px;
+}
+button {
+  padding: 1em;
+  margin-top: 1em;
+}
+html {
+  height: 100%;
+}
+body {
+  height: 100%;
+}
+.stimuli {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  border: solid black 1px;
+}
+
+.stimuli > span {
+  width: 20%;
+  aspect-ratio: 1 / 1;
+  margin: 1em;
+  display: flex;
+  justify-content: center;
+  perspective: 1000px;
+}
+
+.flip-inner:hover {
+  cursor: pointer;
+  box-shadow: 0 0 11px rgba(33, 33, 33, 0.2);
+}
+
+.flip-inner {
+  transition: 0.7s ease-in-out;
+  min-width: 100%;
+  min-height: 100%;
+  transform-style: preserve-3d;
+  perspective: 200px;
+}
+
+.flip-front {
+  aspect-ratio: 1 / 1;
+  max-height: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  backface-visibility: hidden;
+}
+#reference_stimulus_container {
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  min-width: 100%;
+  min-height: 100%;
+  outline-color: #18d718;
+  outline-offset: 0px;
+  outline-style: solid;
+  outline-width: 5px;
+  border-radius: 1px;
+}
+
+#mcgurk_stimuli {
+  background-color: black;
+}
+
+#mcgurk_stimuli > span {
+  width: auto;
+  overflow: hidden;
+  height: 80vh;
+}
+
+#mcgurk_answers {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  flex-direction: column;
+  background-color: black;
+  font-weight: bold;
+  font-size: 3em;
+}
+
+#mcgurk_answers > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80%;
+  height: 40%;
+}
+
+#mcgurk_answers > div > span {
+  aspect-ratio: 1 / 1;
+  min-height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  outline-offset: -5px;
+  outline: 7px solid black;
+  overflow: hidden;
+  cursor: pointer;
+  background-color: white;
+  border-radius: 15%;
+}
+
+#mcgurk_answers > div > span.clicked {
+  background-color: rgb(234, 234, 234);
+}
+
+.flipping-right {
+  transform: rotateY(-180deg);
+}
+
+.flipping-left {
+  transform: rotateY(180deg);
+}
+
+.is-flipped {
+  transform: rotateY(180deg);
+  backface-visibility: hidden;
+}
+
+.showable {
+  position: absolute;
+  transform: translateY(-80%);
+  font-size: 2em;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.showable.visible {
+  display: block;
+  opacity: 100;
+}
+
+.stimuli_to_choose_from:active {
+  box-shadow: none;
+}
+
+.play_button {
+  position: absolute;
+  bottom: 10%;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+img {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+video {
+  min-height: 100%;
+  max-height: 100%;
+  transform: translate(3%);
+  backface-visibility: hidden;
+}

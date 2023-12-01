@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>BA DA test</title>
+    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="wrapper">
+      <p id="ready_for_next_series" hidden>
+        Prêt·e pour la série suivante&nbsp;?
+      </p>
+      <button id="finish_button" onclick="displayResultAndDownload();" hidden>
+        Finish experiment
+      </button>
+      <textarea id="responses" hidden rows="4" cols="50"></textarea>
+      <div id="start_form">
+        <label for="subject_id">Subject ID:</label>
+        <input
+          id="subject_id"
+          style="margin-right: 1em"
+          type="text"
+          name="subject_id"
+          autocomplete="off"
+          oninput="(() => {
+          document.getElementById('fullscreen_button').disabled =
+          !document.getElementById('subject_id').value;
+        })()"
+        />
+        <br />
+        <br />
+
+        <button id="fullscreen_button" onclick="showInstructionPage()" disabled>
+          Go fullscreen and start experiment
+        </button>
+      </div>
+      <div id="instruction" hidden>
+        <p>Bonjour jeune chercheuse ou chercheur&nbsp;!</p>
+        <p>
+          Nous avons une mission passionnante pour toi. Notre brillante
+          scientifique, Axelle, a été clonée, mais quelque chose s’est mal
+          passé. Il y a deux Axelles identiques et super intelligentes, ainsi
+          qu’une Axelle pas très intelligente qui essaye de se cacher. Nous
+          avons besoin de ton aide pour trouver l’Axelle moins intelligente.
+        </p>
+        <p>
+          Sur l’écran, tu verras trois Axelle. La tâche consiste à écouter
+          attentivement pour trouver celle qui produit un son différent. C’est
+          comme un jeu pour trouver un intrus. Si tu arrives à repérer l’Axelle
+          pas très intelligente en cliquant sur le son différent, elle
+          apparaîtra. Mais attention&nbsp;! Elle se cache de mieux en mieux, au
+          fur et à mesure que la mission avance, donc il faut continuer à la
+          chercher.
+        </p>
+        <p>Es-tu prêt·e à devenir un·e super-détective&nbsp;?</p>
+        <p>Clique sur le bouton «&nbsp;Démarrer la série&nbsp;».</p>
+      </div>
+      <button
+        id="start_button"
+        onclick=";
+        document.getElementById('start_button').setAttribute('hidden', '');
+        runSeries();"
+        hidden
+      >
+        Démarrer la série
+      </button>
+    </div>
+    <div class="stimuli" id="stimuli" hidden>
+      <span
+        id="left_stimulus"
+        class="stimuli_to_choose_from"
+        onclick="selectStimulus(event.currentTarget.dataset.stimulus, 'left')"
+        data-stimulus
+      >
+        <p class="speaker showable" id="speaker_left">🔊</p>
+        <p class="cue showable">?</p>
+        <div class="flip-inner" id="left-is-flipping">
+          <div class="flip-front">
+            <img src="axelle.svg" class="axelle_face" />
+            <video
+              muted
+              hidden
+              src="stimuli_december_2023/video_BA.mp4"
+              type="video/mp4"
+              class="BA_video left_stimulus_class"
+            ></video>
+            <video
+              muted
+              hidden
+              src="stimuli_december_2023/video_DA.mp4"
+              type="video/mp4"
+              class="DA_video left_stimulus_class"
+            ></video>
+          </div>
+          <img class="is-flipped" id="is_flipped_left" />
+        </div>
+      </span>
+      <span id="reference_stimulus">
+        <p class="speaker showable" id="speaker_middle">🔊</p>
+        <div id="reference_stimulus_container">
+          <img src="axelle.svg" class="axelle_face" />
+          <video
+            muted
+            hidden
+            src="stimuli_december_2023/video_BA.mp4"
+            type="video/mp4"
+            class="BA_video reference_stimulus_class"
+          ></video>
+          <video
+            muted
+            hidden
+            src="stimuli_december_2023/video_DA.mp4"
+            type="video/mp4"
+            class="DA_video reference_stimulus_class"
+          ></video>
+        </div>
+      </span>
+      <span
+        id="right_stimulus"
+        class="stimuli_to_choose_from"
+        onclick="selectStimulus(event.currentTarget.dataset.stimulus, 'right')"
+        data-stimulus
+      >
+        <p class="speaker showable" id="speaker_right">🔊</p>
+        <p class="cue showable">?</p>
+        <div class="flip-inner" id="right-is-flipping">
+          <div class="flip-front">
+            <video
+              muted
+              hidden
+              src="stimuli_december_2023/video_BA.mp4"
+              type="video/mp4"
+              class="BA_video right_stimulus_class"
+            ></video>
+            <video
+              muted
+              hidden
+              src="stimuli_december_2023/video_DA.mp4"
+              type="video/mp4"
+              class="DA_video right_stimulus_class"
+            ></video>
+            <img src="axelle.svg" class="axelle_face" />
+          </div>
+          <img class="is-flipped" id="is_flipped_right" />
+        </div>
+      </span>
+      <button
+        class="play_button"
+        id="play_button"
+        onclick="playStimuli()"
+        hidden
+      >
+        Écouter les trois sons
+      </button>
+    </div>
+    <div class="stimuli" id="mcgurk_stimuli" hidden>
+      <span>
+        <img id="audio_only_image" src="axelle.svg" hidden />
+        <video
+          muted
+          hidden
+          src="stimuli_december_2023/video_BA.mp4"
+          type="video/mp4"
+          id="BA_video_mcgurk"
+        ></video>
+        <video
+          muted
+          hidden
+          src="stimuli_december_2023/video_DA.mp4"
+          type="video/mp4"
+          id="DA_video_mcgurk"
+        ></video>
+      </span>
+    </div>
+    <div id="mcgurk_answers" hidden>
+      <div>
+        <span
+          id="mcgurk_choice_1"
+          onclick="selectAnswer(event.currentTarget.dataset.answer)"
+          >test1</span
+        >
+        <span
+          id="mcgurk_choice_2"
+          onclick="selectAnswer(event.currentTarget.dataset.answer)"
+          >test2</span
+        >
+      </div>
+      <div>
+        <span
+          id="mcgurk_choice_3"
+          onclick="selectAnswer(event.currentTarget.dataset.answer)"
+          >test3</span
+        >
+        <span
+          id="mcgurk_choice_4"
+          onclick="selectAnswer(event.currentTarget.dataset.answer)"
+          >test4</span
+        >
+      </div>
+    </div>
+    <script type="text/javascript" src="lodash.js"></script>
+    <script type="text/javascript" src="behavioral-task.js"></script>
+  </body>
+</html>
