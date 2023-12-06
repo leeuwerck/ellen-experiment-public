@@ -409,14 +409,40 @@ function setVideoUp(soundPair, referenceSound) {
     video.onplay = null
     video.setAttribute("hidden", "")
   }
-  for (const image of document.getElementsByClassName("axelle_face"))
-    image.removeAttribute("hidden")
 
   if (getCurrentCondition().visual) {
-    for (const image of document.getElementsByClassName("axelle_face"))
+    for (const image of document.getElementsByClassName("BA_video_blurred"))
       image.hidden = true
     for (const video of document.getElementsByClassName(
       getVideoPlayerId(getCurrentCondition().referenceSound)
+    )) {
+      video.removeAttribute("hidden")
+      if (video.className.includes("left_stimulus_class")) {
+        getPlayer(soundPair[0]).onplay = function () {
+          video.currentTime = 0
+          video.play()
+        }
+      }
+      if (video.className.includes("reference_stimulus_class")) {
+        getReferencePlayer(referenceSound).onplay = function () {
+          video.currentTime = 0
+          video.play()
+        }
+      }
+      if (video.className.includes("right_stimulus_class")) {
+        getPlayer(soundPair[1]).onplay = function () {
+          video.currentTime = 0
+          video.play()
+        }
+      }
+    }
+  } else {
+    for (const image of document.getElementsByClassName("BA_video_blurred"))
+      image.removeAttribute("hidden")
+
+    for (const video of document.getElementsByClassName(
+      // selector works only for BA condition
+      "BA_video_blurred"
     )) {
       video.removeAttribute("hidden")
       if (video.className.includes("left_stimulus_class")) {
@@ -514,6 +540,7 @@ function hideInstructionsAndStartButton() {
 }
 
 function showStimuli() {
+  resetImages()
   document.getElementById("stimuli").removeAttribute("hidden")
   document.getElementById("play_button").removeAttribute("hidden")
 }
