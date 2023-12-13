@@ -175,16 +175,26 @@ function playStimuli() {
   document
     .getElementById("left_stimulus")
     .setAttribute("data-stimulus", soundPair[0])
-  document
-    .getElementById("is_flipped_left")
-    .setAttribute("src", isLeftDumb ? "dumb_axelle.png" : "axelle_succeed.png")
+  setTimeout(() => {
+    document
+      .getElementById("is_flipped_left")
+      .setAttribute(
+        "src",
+        isLeftDumb ? "dumb_axelle.png" : "axelle_succeed.png"
+      )
+  }, 800) // timeout is longer than transition of flipping element, which is 0.7 s
 
   document
     .getElementById("right_stimulus")
     .setAttribute("data-stimulus", soundPair[1])
-  document
-    .getElementById("is_flipped_right")
-    .setAttribute("src", isLeftDumb ? "axelle_succeed.png" : "dumb_axelle.png")
+  setTimeout(() => {
+    document
+      .getElementById("is_flipped_right")
+      .setAttribute(
+        "src",
+        isLeftDumb ? "axelle_succeed.png" : "dumb_axelle.png"
+      )
+  }, 800) // timeout is longer than transition of flipping element, which is 0.7 s
 
   setVideoUp(soundPair, getCurrentCondition().referenceSound)
   setSpeakerImagesUp()
@@ -670,9 +680,28 @@ document.addEventListener("keydown", (event) => {
 
 MCGURK_SERIES_LENGTH = 30
 
-const mcGurKBaVideo = document.getElementById("BA_video_mcgurk")
-const mcGurKDaVideo = document.getElementById("DA_video_mcgurk")
-const mcGurkAxelleImage = document.getElementById("audio_only_image")
+const mcGurkBABlurredVideo = document.getElementById("BA_blurred_video_mcgurk")
+const mcGurkDABlurredVideo = document.getElementById("DA_blurred_video_mcgurk")
+const mcGurKVisualOnlyBaVideo = document.getElementById(
+  "BA_visual_only_video_mcgurk"
+)
+const mcGurKVisualOnlyDaVideo = document.getElementById(
+  "DA_visual_only_video_mcgurk"
+)
+const mcGurKCongruentAudioVisualBaVideo = document.getElementById(
+  "congruent_audiovisual_BA_video_mcgurk"
+)
+const mcGurKCongruentAudioVisualDaVideo = document.getElementById(
+  "congruent_audiovisual_DA_video_mcgurk"
+)
+const mcGurKIncongruentAudioBAVisualDaVideo = document.getElementById(
+  "incongruent_audio_BA_visual_DA"
+)
+const mcGurKIncongruentAudioDAVisualBaVideo = document.getElementById(
+  "incongruent_audio_DA_visual_BA"
+)
+
+// const mcGurkAxelleImage = document.getElementById("audio_only_image")
 
 let mcGurkStepIndex = 0
 let mcGurkAnswers = []
@@ -697,8 +726,8 @@ const mcGurkConditions = shuffle(
         // 20 times audio DA visual BA
         "incongruent-audio-DA-visual-BA", // each line has to be played 5 times
         "incongruent-audio-DA-visual-BA", // each line has to be played 5 times
-        "incongruent-audio-DA-visual-BA", // each line has to be played 5 times
-        "incongruent-audio-DA-visual-BA", // each line has to be played 5 times
+        "incongruent-audio-BA-visual-DA", // each line has to be played 5 times
+        "incongruent-audio-BA-visual-DA", // each line has to be played 5 times
       ],
       []
     )
@@ -715,50 +744,35 @@ function playMcGurkStimulus() {
 
   switch (mcGurkConditions[mcGurkStepIndex]) {
     case "audio-only-BA":
-      player = document.getElementById(ba_da_files[0])
-      mcGurkAxelleImage.removeAttribute("hidden")
+      player = mcGurkBABlurredVideo
       break
     case "audio-only-DA":
-      player = document.getElementById(da_ba_files[0])
-      mcGurkAxelleImage.removeAttribute("hidden")
+      player = mcGurkDABlurredVideo
       break
     case "visual-only-BA":
-      player = mcGurKBaVideo
-      player.removeAttribute("hidden")
+      player = mcGurKVisualOnlyBaVideo
       break
     case "visual-only-DA":
-      player = mcGurKDaVideo
-      player.removeAttribute("hidden")
+      player = mcGurKVisualOnlyDaVideo
       break
     case "congruent-audio-visual-BA":
-      player = document.getElementById(ba_da_files[0])
-      player.onplay = function () {
-        mcGurKBaVideo.removeAttribute("hidden")
-        mcGurKBaVideo.currentTime = 0
-        mcGurKBaVideo.play()
-      }
+      player = mcGurKCongruentAudioVisualBaVideo
       break
     case "congruent-audio-visual-DA":
-      player = document.getElementById(da_ba_files[0])
-      player.onplay = function () {
-        mcGurKDaVideo.removeAttribute("hidden")
-        mcGurKDaVideo.currentTime = 0
-        mcGurKDaVideo.play()
-      }
+      player = mcGurKCongruentAudioVisualDaVideo
       break
     case "incongruent-audio-DA-visual-BA":
-      player = document.getElementById(da_ba_files[0])
-      player.onplay = function () {
-        mcGurKBaVideo.removeAttribute("hidden")
-        mcGurKBaVideo.currentTime = 0
-        mcGurKBaVideo.play()
-      }
+      player = mcGurKIncongruentAudioBAVisualDaVideo
+      break
+    case "incongruent-audio-BA-visual-DA":
+      player = mcGurKIncongruentAudioDAVisualBaVideo
       break
 
     default:
       debugger
       break
   }
+  player.removeAttribute("hidden")
   setTimeout(() => {
     playing = true
     player.play()
@@ -824,14 +838,29 @@ function selectAnswer(answer) {
 }
 
 function resetStimuli() {
-  mcGurkAxelleImage.setAttribute("hidden", "")
-  mcGurKBaVideo.setAttribute("hidden", "")
-  mcGurKBaVideo.currentTime = 0
-  mcGurKDaVideo.setAttribute("hidden", "")
-  mcGurKDaVideo.currentTime = 0
-  document.getElementById("audio_only_image").setAttribute("hidden", "")
-  document.getElementById(da_ba_files[0]).onplay = null
-  document.getElementById(ba_da_files[0]).onplay = null
+  mcGurkBABlurredVideo.setAttribute("hidden", "")
+  mcGurkBABlurredVideo.currentTime = 0
+
+  mcGurkDABlurredVideo.setAttribute("hidden", "")
+  mcGurkDABlurredVideo.currentTime = 0
+
+  mcGurKVisualOnlyBaVideo.setAttribute("hidden", "")
+  mcGurKVisualOnlyBaVideo.currentTime = 0
+
+  mcGurKVisualOnlyDaVideo.setAttribute("hidden", "")
+  mcGurKVisualOnlyDaVideo.currentTime = 0
+
+  mcGurKCongruentAudioVisualBaVideo.setAttribute("hidden", "")
+  mcGurKCongruentAudioVisualBaVideo.currentTime = 0
+
+  mcGurKCongruentAudioVisualDaVideo.setAttribute("hidden", "")
+  mcGurKCongruentAudioVisualDaVideo.currentTime = 0
+
+  mcGurKIncongruentAudioBAVisualDaVideo.setAttribute("hidden", "")
+  mcGurKIncongruentAudioBAVisualDaVideo.currentTime = 0
+
+  mcGurKIncongruentAudioDAVisualBaVideo.setAttribute("hidden", "")
+  mcGurKIncongruentAudioDAVisualBaVideo.currentTime = 0
 }
 
 function formatMcGurkResponses() {
