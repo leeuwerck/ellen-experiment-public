@@ -16,6 +16,13 @@
       </button>
       <textarea id="responses" hidden rows="4" cols="50"></textarea>
       <div id="start_form">
+        <audio
+          controls
+          id="calibration_button"
+          src="stimuli_december_2023/ba_da/stimulus001.wav"
+          loop="true"
+        ></audio>
+        <br />
         <label for="subject_id">Subject ID:</label>
         <input
           id="subject_id"
@@ -174,9 +181,6 @@
     </div>
     <div class="stimuli" id="mcgurk_stimuli" hidden>
       <span>
-        <!-- <img id="audio_only_image" src="axelle.svg" hidden /> -->
-        <!-- add two blurred videos -->
-
         <video
           hidden
           src="stimuli_december_2023/BA_AO_RMS0.009.mp4"

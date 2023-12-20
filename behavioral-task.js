@@ -2,11 +2,13 @@ const {
   includes,
   filter,
   find,
+  findLast,
   flatten,
   isEqual,
   last,
   nth,
   orderBy,
+  pickBy,
   range,
   sampleSize,
   shuffle,
@@ -141,14 +143,19 @@ const MAX_STEP_COUNT = isTrial ? 3 : 20
 
 const conditions = shuffle([
   { visual: false, referenceSound: "BA" },
-  // { visual: false, referenceSound: "DA" },
   { visual: true, referenceSound: "BA" },
+  // { visual: false, referenceSound: "DA" },
   // { visual: true, referenceSound: "DA" },
 ])
 
 const experimentType = includes(window.location.href.split("#"), "mcgurk")
   ? "mcgurk"
   : "discrimination"
+
+if (!includes(window.location.href.split("#"), "calibration")) {
+  const startCalibrationButton = document.getElementById("calibration_button")
+  startCalibrationButton.remove()
+}
 
 let hasExperimentStarted = false
 
@@ -169,8 +176,6 @@ function playStimuli() {
   soundPair = sampleSize([nextSoundNumber, getReferenceSound()], 2)
 
   const isLeftDumb = soundPair[0] !== getReferenceSound()
-  console.log("reference", getReferenceSound())
-  console.log("soundPair", soundPair)
 
   document
     .getElementById("left_stimulus")
@@ -241,14 +246,7 @@ function selectStimulus(stimulus, side) {
   //  terminate series
   if (
     steps.filter((s) => s.seriesNumber === seriesNumber).length >=
-      MAX_STEP_COUNT ||
-    isEqual(
-      takeRight(
-        steps.map((s) => s.stepSize),
-        16
-      ),
-      [10, 0, 0, 0, -10, 0, 0, 10, 0, 0, -10, 0, 0]
-    )
+    MAX_STEP_COUNT
   ) {
     if (seriesNumber === conditions.length) {
       hideStimuli()
@@ -260,6 +258,7 @@ function selectStimulus(stimulus, side) {
   }
 
   document.getElementById("play_button").removeAttribute("disabled")
+  consoleLogStepChart()
 }
 
 function playLeftStimulus(soundNumber) {
@@ -319,6 +318,59 @@ function addToSteps(stimulusNumber) {
   localStorage.setItem(`${Date.now()}-steps`, JSON.stringify(steps))
 }
 
+function consoleLogStepChart() {
+  console.log(
+    `${steps
+      .map(
+        ({ stepSize, stimulusNumber, succeeded }) =>
+          `${" ".repeat(stimulusNumber)}▲ ${stepSize} ${
+            succeeded ? "succeeded" : "failed"
+          }`
+      )
+      .join("\n")}`
+  )
+}
+
+function getNextCycleForSucceeded(variation) {
+  switch (variation) {
+    case +10:
+      return -10
+    case -10:
+      return -10
+    case +5:
+      return -5
+    case -5:
+      return -5
+    default:
+      return -5
+  }
+}
+
+function getNextCycleForFailed(variation) {
+  switch (variation) {
+    case -15:
+      return +10
+    case +10:
+      return +10
+    case -10:
+      return +5
+    case -5:
+      return +5
+    case +5:
+      return +5
+    default:
+      return +5
+  }
+}
+
+function getCurrentCycleVariation(steps) {
+  return findLast(steps, (s) => s.stepSize !== 0)?.stepSize
+}
+
+function isCurrentCycleOver(series) {
+  return takeRightWhile(series, (step) => step.stepSize === 0).length > 1
+}
+
 function getNextSoundNumber() {
   const currentSeriesSteps = orderBy(steps, "stepNumber").filter(
     (s) => s.seriesNumber === seriesNumber
@@ -331,75 +383,43 @@ function getNextSoundNumber() {
     seriesNumber != lastStep.seriesNumber
   ) {
     stimulusNumber = last(stimuliIndexRange)
-    return stimulusNumber
+    stimulusNumber
   }
 
-  if (
+  // decrease by 15 if succeeded last step or last stimulus was 100 (ceiling)
+  else if (
     lastStep.succeeded &&
     (lastStep.stepSize === -15 ||
       currentSeriesSteps.length === 1 ||
       lastStep.stimulusNumber === 100)
   ) {
     stimulusNumber = lastStep.stimulusNumber - 15
+    return stimulusNumber
   }
 
-  // decrease by 10 if failed the 15 step
-  if (!lastStep.succeeded && lastStep.stepSize === -15) {
+  // increase by 10 if failed the 15 step
+  else if (!lastStep.succeeded && lastStep.stepSize === -15) {
     stimulusNumber = lastStep.stimulusNumber + 10
   }
 
   // failed on first try
-  if (!lastStep.succeeded && lastStep.stimulusNumber === 100) {
+  else if (!lastStep.succeeded && lastStep.stimulusNumber === 100) {
     stimulusNumber = lastStep.stimulusNumber
-  }
-
-  // decrease by 10 if failed the 10 step
-  if (!lastStep.succeeded && lastStep.stepSize === -10) {
-    stimulusNumber = lastStep.stimulusNumber + 10
-  }
-
-  // add condition for floor or ceiling, where step size is O and we have to look for a the previous working step size
-  if (!lastStep.succeeded && lastStep.stepSize === 10) {
-    stimulusNumber = lastStep.stimulusNumber + 10
-  }
-
-  // start looping if right answer for step 10
-  if (
-    lastStep.succeeded &&
-    lastStep.stepSize === -10 &&
-    filter(steps, (s) => s.stepSize === 10).length > 0 &&
-    takeRightWhile(currentSeriesSteps, (s) => s.stepSize === 0).length < 2
-  ) {
+  } else if (lastStep.succeeded && isCurrentCycleOver(currentSeriesSteps)) {
+    stimulusNumber =
+      lastStep.stimulusNumber +
+      getNextCycleForSucceeded(getCurrentCycleVariation(currentSeriesSteps))
+  } else if (lastStep.succeeded && !isCurrentCycleOver(currentSeriesSteps)) {
     stimulusNumber = lastStep.stimulusNumber
+  } else if (!lastStep.succeeded) {
+    stimulusNumber =
+      lastStep.stimulusNumber +
+      getNextCycleForFailed(getCurrentCycleVariation(currentSeriesSteps))
   }
 
-  // keep looping if right answer for step 10
-  if (
-    lastStep.succeeded &&
-    filter(currentSeriesSteps, (s) => s.stepSize === 10).length > 0 &&
-    takeRightWhile(currentSeriesSteps, (s) => s.stepSize === 0).length < 2
-  ) {
-    stimulusNumber = lastStep.stimulusNumber
-  }
-
-  if (
-    lastStep.succeeded &&
-    lastStep.stepSize === 0 &&
-    filter(currentSeriesSteps, (s) => s.stepSize === 10).length > 0 &&
-    takeRightWhile(currentSeriesSteps, (s) => s.stepSize === 0).length === 2
-  ) {
-    if (nth(currentSeriesSteps, -3).stepSize === 10) {
-      stimulusNumber = lastStep.stimulusNumber + -10
-    }
-    if (nth(currentSeriesSteps, -3).stepSize === -10) {
-      stimulusNumber = lastStep.stimulusNumber + 10
-    }
-  }
-
+  if (!stimulusNumber) stimulusNumber = 100
   if (stimulusNumber < 1) stimulusNumber = 1
   if (stimulusNumber > 100) stimulusNumber = 100
-
-  if (!stimulusNumber) debugger
 
   return stimulusNumber
 }
