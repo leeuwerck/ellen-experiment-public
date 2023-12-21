@@ -394,6 +394,7 @@ function getNextSoundNumber() {
       lastStep.stimulusNumber === 100)
   ) {
     stimulusNumber = lastStep.stimulusNumber - 15
+    if (stimulusNumber < 1) stimulusNumber = 1
     return stimulusNumber
   }
 
