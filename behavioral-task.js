@@ -120,8 +120,6 @@ const stimulus_file_names = [
   "stimulus100.wav",
 ]
 
-
-
 const ba_da_directory = "stimuli_december_2023/ba_da"
 const da_ba_directory = "stimuli_december_2023/da_ba"
 
@@ -244,6 +242,7 @@ function selectStimulus(stimulus, side) {
   }
 
   last(orderBy(steps, "orderBy")).succeeded = hasSucceeded
+  last(orderBy(steps, "orderBy")).ISOtimeStamp = new Date().toISOString()
 
   //  terminate series
   if (
@@ -258,7 +257,8 @@ function selectStimulus(stimulus, side) {
       hideStimuli()
     }
   } else {
-    setTimeout(playStimuli, 2000);
+    playing = true
+    setTimeout(playStimuli, 2000)
   }
 
   // document.getElementById("play_button").removeAttribute("disabled") // plays automatically from the selectStimulus function, button no longer needed
@@ -551,6 +551,7 @@ function runSeries() {
   switch (experimentType) {
     case "discrimination":
       showStimuli()
+      playing = true
       setTimeout(playStimuli, 2000)
       break
     case "mcgurk":
@@ -577,6 +578,7 @@ function hideInstructionsAndStartButton() {
 
 function showStimuli() {
   resetImages()
+  setVideoUp([100, 100], "BA") // hardcoded to display the same video as the stimuli that are setup when playStimuli function is called right after
   document.getElementById("stimuli").removeAttribute("hidden")
   // document.getElementById("play_button").removeAttribute("hidden") // plays automatically from the selectStimulus function, button no longer needed
 }
@@ -612,37 +614,47 @@ function hideChoiceCues() {
 }
 
 function displayResultAndDownload() {
+  delete window.onbeforeunload
+  document.exitFullscreen()
   document.getElementById("finish_button").setAttribute("hidden", "")
+
+  let filename_experiment_type
+  let responsesToDownload
   if (experimentType === "mcgurk") {
-    document.getElementById("responses").value = formatMcGurkResponses()
+    filename_experiment_type = "mcgurk"
+    responsesToDownload = formatMcGurkResponses()
   } else {
-    document.getElementById("responses").value = formatResponses(steps)
+    filename_experiment_type = "discrimination"
+    responsesToDownload = formatResponses(steps)
   }
+  document.getElementById("responses").value = responsesToDownload
+
   document.getElementById("responses").removeAttribute("hidden")
 
-  subjectId = document.getElementsByName("subject_id")[0].value
+  subjectId =
+    document.getElementsByName("subject_id")[0].value || "missing_subject_id"
 
   let downloadElement = document.createElement("a")
   downloadElement.setAttribute(
     "href",
-    "data:text/plain;charset=utf-8," +
-      encodeURIComponent(formatResponses(steps))
+    "data:attachment/csv" + "," + encodeURI(responsesToDownload)
   )
+
   downloadElement.setAttribute(
     "download",
-    `responses-${subjectId}-${new Date().toLocaleString()}.csv`
+    "responses_" + filename_experiment_type + "_" + subjectId + ".csv"
   )
 
   downloadElement.style.display = "none"
   document.body.appendChild(downloadElement)
 
-  downloadElement.click()
-
-  document.body.removeChild(downloadElement)
+  setTimeout(() => {
+    downloadElement.click()
+  }, 1000)
 }
 
 function formatResponses(response) {
-  return `series_number,step_number,stimulus_number,succeeded,condition,reference_sound
+  return `series_number,step_number,stimulus_number,succeeded,condition,reference_sound,iso_timestamp
 ${response
   .map(
     (r) =>
@@ -657,7 +669,9 @@ ${response
         "," +
         r.condition +
         "," +
-        r.referenceSound
+        r.referenceSound +
+        "," +
+        r.ISOtimeStamp
       }`
   )
   .join("\n")}
@@ -819,7 +833,7 @@ const answerSquares = [
 ]
 
 function showAnswers() {
-  shuffle(possibleAnswers).map((answer, i) => {
+  possibleAnswers.map((answer, i) => {
     answerSquares[i].innerHTML = answer
     answerSquares[i].setAttribute("data-answer", answer)
     answerSquares[i].classList.remove("clicked")
@@ -838,6 +852,7 @@ function selectAnswer(answer) {
       stepNumber: mcGurkStepIndex + 1,
       stimulus: mcGurkConditions[mcGurkStepIndex],
       response: answer,
+      ISOtimestamp: new Date().toISOString(),
     },
   ]
 
@@ -890,9 +905,20 @@ function resetStimuli() {
 }
 
 function formatMcGurkResponses() {
-  return `step_number,stimulus,response
+  return `step_number,stimulus,response,iso_timestamp
 ${mcGurkAnswers
-  .map((r) => `${r.stepNumber + "," + r.stimulus + "," + r.response}`)
+  .map(
+    (r) =>
+      `${
+        r.stepNumber +
+        "," +
+        r.stimulus +
+        "," +
+        r.response +
+        "," +
+        r.ISOtimestamp
+      }`
+  )
   .join("\n")}
   `
 }
