@@ -120,6 +120,8 @@ const stimulus_file_names = [
   "stimulus100.wav",
 ]
 
+
+
 const ba_da_directory = "stimuli_december_2023/ba_da"
 const da_ba_directory = "stimuli_december_2023/da_ba"
 
@@ -255,9 +257,11 @@ function selectStimulus(stimulus, side) {
       showNextSeries()
       hideStimuli()
     }
+  } else {
+    setTimeout(playStimuli, 2000);
   }
 
-  document.getElementById("play_button").removeAttribute("disabled")
+  // document.getElementById("play_button").removeAttribute("disabled") // plays automatically from the selectStimulus function, button no longer needed
   consoleLogStepChart()
 }
 
@@ -547,6 +551,7 @@ function runSeries() {
   switch (experimentType) {
     case "discrimination":
       showStimuli()
+      setTimeout(playStimuli, 2000)
       break
     case "mcgurk":
       playMcGurkStimulus()
@@ -573,7 +578,7 @@ function hideInstructionsAndStartButton() {
 function showStimuli() {
   resetImages()
   document.getElementById("stimuli").removeAttribute("hidden")
-  document.getElementById("play_button").removeAttribute("hidden")
+  // document.getElementById("play_button").removeAttribute("hidden") // plays automatically from the selectStimulus function, button no longer needed
 }
 
 function hideStimuli() {
