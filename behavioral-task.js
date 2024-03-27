@@ -824,7 +824,7 @@ function playMcGurkStimulus() {
   showMcGurkStimuli()
 }
 
-const possibleAnswers = ["BA", "DA", "BDA", "Autre"]
+const possibleAnswers = ["BA", "DA", "BDA", "DBA"]
 const answerSquares = [
   document.getElementById("mcgurk_choice_1"),
   document.getElementById("mcgurk_choice_2"),
