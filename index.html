@@ -19,21 +19,8 @@
         <audio
           controls
           id="calibration_button"
-          <audio id="audio1" src="video2_recordedsound_DA_silenced_RMS0/009.wav"></audio>
-          <audio id="audio2" src="stimuli_december_2023/video2_recordedsound_DA_silenced_RMS0.009_cont10ms.wav"></audio>
-          <button id="calibration_button" onclick="playAudios()">Play Audio</button>
-          <script>
-          function playAudios() {
-            var audio1 = document.getElementById('audio1');
-            var audio2 = document.getElementById('audio2');
-    
-            // Play the first audio
-            audio1.play();
-    
-            // When the first audio finishes playing, play the second audio
-            audio1.onended = function() {
-            audio2.play();
-              
+          src="video2_recordedsound_DA_silenced_RMS0.009.wav"></audio>
+         
         ></audio>
         <br />
         <label for="subject_id">Subject ID:</label>
